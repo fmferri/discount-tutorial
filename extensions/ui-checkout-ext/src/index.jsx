@@ -4,6 +4,9 @@ import {
   render,
   Banner,
   useTranslate,
+  useApplyAttributeChange,
+  useApplyMetafieldsChange,
+  useAttributes
 } from '@shopify/checkout-ui-extensions-react';
 import { useEffect, useState } from 'react';
 
@@ -11,6 +14,9 @@ render('Checkout::Dynamic::Render', () => <App />);
 
 function App() {
   const {extensionPoint} = useExtensionApi();
+  const applyAttributeChange = useApplyAttributeChange();
+  const applyMetafieldsChange = useApplyMetafieldsChange();
+  const attributes = useAttributes();
   const translate = useTranslate();
   const [loading, setLoading] = useState(false);
   const [dataLoaded, setDataLoaded] = useState('ancora nulla');
@@ -30,6 +36,20 @@ function App() {
         .then( data => {
           console.log('RESPONSE IS ', data)
           setDataLoaded(JSON.stringify(data))
+          
+          try{
+            applyAttributeChange({
+              key: 'discount',
+              type: 'updateAttribute',
+              value: "50"
+            }).then((data) => {
+              console.log('ATTRIBUTES', data)
+            }).then(() => {
+              console.log('ATT', attributes)
+            })
+          } catch(e){
+            console.log('ERROR IN useApplyAttributeChange', e)
+          }
         })
     }
     catch (error) {
@@ -43,7 +63,7 @@ function App() {
         title="TEST DISCOUNT"
         status="info"
       >
-      CIAONE 3 {dataLoaded}
+      CIAONE 4 {dataLoaded}
     </Banner>
   )
 }
