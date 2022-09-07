@@ -17,7 +17,9 @@ fn function(input: input::Input) -> Result<FunctionResult, Box<dyn std::error::E
     let cart_attribute = input.cart.attribute;
 
     if cart_attribute.is_some() {
-        config.percentage = 90.0;
+        let value = cart_attribute.map(|cart_attribute| cart_attribute.value);
+        // TODO: need to understand how the expect works!
+        config.percentage = value.expect("REASON").parse::<f64>().unwrap();
     }
 
     if cart_lines.is_empty() || config.percentage == 0.0 {

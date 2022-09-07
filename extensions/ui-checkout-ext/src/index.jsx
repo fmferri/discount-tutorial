@@ -37,7 +37,7 @@ function App() {
           // insert mocked data here
           const mock = {
             memberType: 'SILVER',
-            value: '10'
+            value: '50'
           };
           data = mock; // add your object here
           setApiResponse(JSON.stringify(data));
