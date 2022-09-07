@@ -1,5 +1,9 @@
 query Input {
   cart {
+    attribute(key: "volume_code") {
+      key
+      value
+    }
     lines {
       quantity
       merchandise {

@@ -13,11 +13,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn function(input: input::Input) -> Result<FunctionResult, Box<dyn std::error::Error>> {
     let mut config: input::Configuration = input.configuration();
-
-    // config.percentage = 50.0;
-    // panic!();
-
     let cart_lines = input.cart.lines;
+    let cart_attribute = input.cart.attribute;
+
+    if cart_attribute.is_some() {
+        config.percentage = 90.0;
+    }
 
     if cart_lines.is_empty() || config.percentage == 0.0 {
         return Ok(FunctionResult {

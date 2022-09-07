@@ -54,8 +54,11 @@ pub mod input {
 
     impl input::Input {
         pub fn configuration(&self) -> Configuration {
-            let value: Option<&str> = self.discount_node.metafield
-                    .as_ref().and_then(|metafield| metafield.value.as_deref());
+            let value: Option<&str> = self
+                .discount_node
+                .metafield
+                .as_ref()
+                .and_then(|metafield| metafield.value.as_deref());
             value.map(Configuration::from_str).unwrap_or_default()
         }
     }
@@ -63,8 +66,14 @@ pub mod input {
     #[derive(Clone, Debug, Deserialize)]
     pub struct Cart {
         pub lines: Vec<CartLine>,
+        pub attribute: Option<Attribute>,
     }
 
+    #[derive(Clone, Debug, Serialize, Deserialize)]
+    pub struct Attribute {
+        pub key: String,
+        pub value: String,
+    }
     #[derive(Clone, Debug, Deserialize)]
     pub struct CartLine {
         pub quantity: Int,
