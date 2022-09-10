@@ -1,3 +1,9 @@
+# Running in DEV
+
+run with "yarn dev" or "npm run dev".
+
+get the ngrok url from the console and paste it in https://partners.shopify.com/ unnder All apps -> discount tutorial -> App setup -> App proxy
+
 # Shopify App Template - Node
 
 This is a template for building a [Shopify app](https://shopify.dev/apps/getting-started) using Node and React. It contains the basics for building a Shopify app.
