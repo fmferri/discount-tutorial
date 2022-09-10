@@ -12,6 +12,8 @@ import productCreator from "./helpers/product-creator.js";
 
 import metafields from "./frontend/metafields.js";
 
+import applyLavaHooksApiEndpoints from "./middleware/lava-hooks-api.js";
+
 const USE_ONLINE_TOKENS = false;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
 
@@ -222,6 +224,10 @@ export async function createServer(
     }
   });
 
+  app.use(express.json());
+
+  applyLavaHooksApiEndpoints(app);
+
   // All endpoints after this point will require an active session
   app.use(
     "/api/*",
@@ -261,8 +267,6 @@ export async function createServer(
     }
     res.status(status).send({ success: status === 200, error });
   });
-
-  app.use(express.json());
 
   const runDiscountMutation = async (req, res, mutation) => {
     const session = await Shopify.Utils.loadCurrentSession(

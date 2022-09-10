@@ -8,6 +8,7 @@ import {
   useAttributes,
 } from "@shopify/checkout-ui-extensions-react";
 
+
 // Set the entry points for the extension
 render("Checkout::Dynamic::Render", () => <App />);
 
@@ -88,16 +89,14 @@ function App() {
 
   useEffect(() => {
     if (!apiResponse) {
-      testApplyLavaDiscount();
+      // testApplyLavaDiscount();
     }
   }, []);
 
   // Render checkout-ui
   return (
-    <>
       <Banner title={"MY CHECKOUT UI - test automatic discount"}>
         RESPONSE FROM LAVA API CALL:: {apiResponse}
       </Banner>
-    </>
-  );
+  ); 
 }

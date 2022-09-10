@@ -1,0 +1,15 @@
+type = "web_pixel"
+name = "analytics_web_pixel_ext"
+
+runtime_context = "strict"
+
+[configuration]
+type = "object"
+
+[configuration.fields.accountID]
+name = "Account ID"
+description = "Account ID"
+type = "single_line_text_field"
+validations =  [
+  { name = "min", value = "1" }
+]
