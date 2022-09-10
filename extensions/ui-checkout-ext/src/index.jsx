@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+
 import {
   render,
   Banner,
@@ -6,6 +7,7 @@ import {
   useApplyAttributeChange,
   useApplyCartLinesChange,
   useAttributes,
+  View,
 } from "@shopify/checkout-ui-extensions-react";
 
 
@@ -18,6 +20,7 @@ function App() {
   const cartLines = useCartLines();
   const getAttributes = useAttributes();
   const [apiResponse, setApiResponse] = useState();
+  
 
   const testApplyLavaDiscount = async () => {
     console.log("testApplyLavaDiscount");
@@ -25,7 +28,7 @@ function App() {
     const productId = cartLines[0].merchandise?.id;
     try {
       // call LAVA API
-      await fetch("https://httpbin.org/ip", {
+      await fetch("https://jsonplaceholder.typicode.com/users/1", {
         mode: "cors",
         credentials: "same-origin",
         headers: {
@@ -44,6 +47,25 @@ function App() {
           setApiResponse(JSON.stringify(data));
           console.log(" LAVA RESPONSE IS ", data);
           try {
+            
+
+            /**
+             * we need to check if the current cart attribute is already setted
+             * and is equal to the one retrieve by the api to avoid incurring in a loop
+             */
+            attributes = getAttributes;
+            let foundAttribute = null;
+            attributes.forEach(element => {
+              if(element.key == 'volume_code'){
+                foundAttribute = element.value; 
+              }
+            });
+
+            if(foundAttribute == data.value){
+              console.warn('Attribute already setted and no need to change');
+              return;
+            }
+
             /* applyAttributeChange sets an arbitrary attribute to the cart
               insert attribute field in input.graphql and in api.rs as optional
              */
@@ -89,14 +111,23 @@ function App() {
 
   useEffect(() => {
     if (!apiResponse) {
-      // testApplyLavaDiscount();
+      testApplyLavaDiscount();
     }
   }, []);
 
   // Render checkout-ui
   return (
-      <Banner title={"MY CHECKOUT UI - test automatic discount"}>
-        RESPONSE FROM LAVA API CALL:: {apiResponse}
+      <Banner title={"Test smart discount via external api service"}>
+        <View>Step 1: fetch data from an external API (now using a mocked api)</View>
+        <View>Step 2: set a cart attribute specific for the discount needed</View>
+        <View>Step 3: update the cart to apply the discount.</View>
+        <View>&nbsp;</View>
+        <View>&nbsp;</View>
+        <View>PROS: the customization use the new Shopify approach implementing a checkout ui extension + cloud functions</View>
+        <View>CONS: we need to load the cart twice in order to re-run the discount calculation</View>
+        <View>Optimal solution: we need to find a way to set the cart attribute before entering the checkout page intercepting the user at login or autologin</View>
+        <View>&nbsp;</View>
+        MOCKED RESPONSE FROM API: {apiResponse}
       </Banner>
   ); 
 }

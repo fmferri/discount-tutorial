@@ -16,6 +16,8 @@
     "@shopify/checkout-ui-extensions-react": "^0.18.0",
     "@shopify/cli": "3.9.2",
     "@shopify/web-pixels-extension": "^0.1.1",
+    "cors": "^2.8.5",
+    "global": "^4.4.0",
     "react": "^17.0.0",
     "usehooks-ts": "^2.6.0"
   },

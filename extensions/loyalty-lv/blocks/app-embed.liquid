@@ -1,6 +1,26 @@
 <button is="party-button">
-  <span class="visually-hidden">Start the party!</span>
+
 </button>
+<div is="customer-info" >
+  {% if customer -%}
+    <div>
+      Hi {{ customer.name }}!
+    </div>
+    <form class="visually-hidden" id="lv-customer-info">
+      <input type="text" name="email" value="{{ customer.email }}">
+      <input type="text" name="accepts_marketing" value="{{ customer.accepts_marketing }}">
+      <input type="text" name="first_name" value="{{ customer.first_name }}">
+      <input type="text" name="has_account" value="{{ customer.has_account }}">
+      <input type="text" name="id" value="{{ customer.id }}">
+      <input type="text" name="name" value="{{ customer.name }}">
+      <input type="text" name="tags" value="{{ customer.tags }}">
+      <input type="text" name="tags" value="{{ customer.tags }}">
+      <input type="text" name="discount_amount" value="{{ discount_allocation.amount }}">
+      <input type="text" name="discount_application" value="{{ discount_allocation.discount_application }}">
+
+    </form>
+  {%- endif %}
+</div>
 
 <style>
   .visually-hidden {
@@ -14,16 +34,15 @@
     clip: rect(0 0 0 0);
     word-wrap: normal!important;
   }
-  
-  @-webkit-keyframes rainbow {
-    0% {border-color: hsl(0, 100%, 50%);}
-    14% {border-color: hsl(30,100%,50%);}
-    28% {border-color: hsl(60,100%,50%);}
-    42% {border-color: hsl(120,100%,50%);}
-    56% {border-color:  hsl(240,100%,50%);}
-    70% {border-color: hsl(280,100%,50%);}
-    84% {border-color: hsl(320,100%,50%);}
-    100% {border-color: hsl(255, 100%, 50%);}
+
+  div[is="customer-info"] {
+    position: fixed;
+    bottom: 100px;
+    right: 15px;
+    background: #b1d9ff99;
+    padding: 20px;
+    border-radius: 5px;
+    font-weight: bold;
   }
 
   button[is="party-button"] {
@@ -32,7 +51,8 @@
     right: 15px;
     width: 80px;
     height: 80px;
-    background: url("{{ 'dog-in-birthday-hat.jpg' | asset_img_url: '180x180' }}") no-repeat center;
+    background: url("https://ui-avatars.com/api/?name={{ customer.name }}") no-repeat center;
+    background-size: cover;
     border-radius: 50%;
     border: 4px solid hsl(0, 100%, 50%);
     animation: rainbow 10s infinite alternate;

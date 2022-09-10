@@ -6,17 +6,25 @@
   The authorization header is added by App Bridge in the frontend code.
 */
 
-import { Shopify } from "@shopify/shopify-api";
+import cors from "cors";
 
 export default function applyLavaHooksApiEndpoints(app) {
-  app.post("/api/lv/cartupdate", async (req, res) => {
+  app.post("/api/lv/cartupdate", cors(), async (req, res) => {
     try {
       console.log("WEBOOK REQUEST CARTUPDATE ARRIVATA");
       console.log(req.body);
-      res.send("SUCCESSSSSS!!!!");
+      const discountResponse = await checkForDiscount(req.body);
+      res.header("Access-Control-Allow-Origin");
+      res.send(discountResponse);
       res.end();
     } catch (error) {
+      console.log("ERROR", error);
       res.status(500).send(error.message);
     }
   });
+}
+
+async function checkForDiscount(data) {
+  const response = { statusDiscount: "OK" };
+  return JSON.stringify(response);
 }

@@ -14,6 +14,8 @@ import metafields from "./frontend/metafields.js";
 
 import applyLavaHooksApiEndpoints from "./middleware/lava-hooks-api.js";
 
+import cors from "cors";
+
 const USE_ONLINE_TOKENS = false;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
 
@@ -205,6 +207,8 @@ export async function createServer(
   app.set("top-level-oauth-cookie", TOP_LEVEL_OAUTH_COOKIE);
   app.set("active-shopify-shops", ACTIVE_SHOPIFY_SHOPS);
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
+
+  app.use(cors());
 
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
 
