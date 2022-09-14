@@ -17,15 +17,17 @@ export default function applyLavaHooksApiEndpoints(app) {
       console.log("BODY", req.body);
       // console.log("HEADER", req.headers);
       // console.log("PARAMS", req.params);
-      const customer = getCustomerInfo(req.body.id)
+      const customerInput = req.body;
+      console.log("customerInput", customerInput);
+      const customer = getCustomerInfo(customerInput.id)
         .then((data) => {
           console.log("SUCCESS CUSTOMER", JSON.stringify(data, undefined, 2));
           const updatedCustomer = updateCustomerInfo(data).then(
             (updatedCustomer) => {
-              console.log("UPDATED CUSTOMER", updatedCustomer);
-              const updatedCustomer2 = getCustomerInfo(req.body.id).then(
+              // console.log("UPDATED CUSTOMER", updatedCustomer);
+              const updatedCustomer2 = getCustomerInfo(customerInput.id).then(
                 (updatedCustomer2) => {
-                  console.log("UPDATED CUSTOMER2", updatedCustomer2);
+                  // console.log("UPDATED CUSTOMER2", updatedCustomer2);
                 }
               );
             }
@@ -45,10 +47,15 @@ export default function applyLavaHooksApiEndpoints(app) {
       res.status(500).send(error.message);
     }
   });
+
+  app.post("/api/lv/config", async (req, res) => {
+    configRespone = {};
+    res.send(configResponse);
+  });
 }
 
 const getCustomerInfo = async (id) => {
-  console.log("TESTING getUserInfo");
+  // console.log("TESTING getUserInfo", id);
   id = "gid://shopify/Customer/" + id;
   const endpoint =
     "https://mdgb-dev-store.myshopify.com/admin/api/2022-07/graphql.json";
@@ -75,7 +82,7 @@ const getCustomerInfo = async (id) => {
       }
     }
   `;
-  console.log("QUERY", query);
+  // console.log("QUERY", query);
   const client = new GraphQLClient(endpoint, {
     headers: {
       "X-Shopify-Access-Token": process.env.ADMIN_API_ACCESS_TOKEN,
@@ -87,8 +94,8 @@ const getCustomerInfo = async (id) => {
 const updateCustomerInfo = async (customer) => {
   customer = JSON.parse(JSON.stringify(customer)).customer;
   customer.tags = "SILVER-50";
-  console.log("TESTING updateCustomerInfo", customer);
-  console.log("CUSTOMER ID", customer.id);
+  // console.log("TESTING updateCustomerInfo", customer);
+  // console.log("CUSTOMER ID", customer.id);
   // id = customer.customer.id;
   const endpoint =
     "https://mdgb-dev-store.myshopify.com/admin/api/2022-07/graphql.json";
@@ -107,7 +114,7 @@ const updateCustomerInfo = async (customer) => {
       }
     }
   `;
-  console.log("mutation", mutation);
+  // console.log("mutation", mutation);
   const variables = {
     input: {
       id: customer.id,
@@ -122,7 +129,7 @@ const updateCustomerInfo = async (customer) => {
   return client
     .request(mutation, variables)
     .then((data) => {
-      console.log("CUSTOMER Updated", JSON.stringify(data, undefined, 2));
+      // console.log("CUSTOMER Updated", JSON.stringify(data, undefined, 2));
       return data;
     })
     .catch((err) => {
@@ -131,6 +138,10 @@ const updateCustomerInfo = async (customer) => {
 };
 
 async function checkForDiscount(data) {
-  const response = { statusDiscount: "OK" };
+  const response = {
+    statusDiscount: "OK",
+    attributeKey: "volume_code",
+    attributeValue: "20::" + data.id, // replace with something like <userId>-<value> possibly encoded
+  };
   return JSON.stringify(response);
 }

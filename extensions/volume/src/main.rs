@@ -12,14 +12,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn function(input: input::Input) -> Result<FunctionResult, Box<dyn std::error::Error>> {
+    // extract variables so we dont need to use map functions
     let mut config: input::Configuration = input.configuration();
     let cart_lines = input.cart.lines;
     let cart_attribute = input.cart.attribute;
+    let buyer_identity = input.cart.buyerIdentity;
+    let email = buyer_identity.email;
+    let customer_id = buyer_identity.customer.id.to_string();
+
+    if customer_id.is_empty() {
+        // if the customer id is empty return no discount
+        panic!("Customer id is_empty");
+        return Ok(FunctionResult {
+            discounts: vec![],
+            discount_application_strategy: DiscountApplicationStrategy::First,
+        });
+    }
 
     if cart_attribute.is_some() {
-        let value = cart_attribute.map(|cart_attribute| cart_attribute.value);
+        // read che attribute
+        let attribute = cart_attribute
+            .map(|cart_attribute| cart_attribute.value)
+            .expect("REASON")
+            .to_string();
         // TODO: need to understand how the expect works!
-        config.percentage = value.expect("REASON").parse::<f64>().unwrap();
+        let value = attribute.split("::").nth(0).unwrap();
+        let id = attribute.split("::").nth(1).unwrap();
+        if "gid://shopify/Customer/".to_owned() + id == customer_id {
+            config.percentage = value.parse::<f64>().unwrap();
+        } else {
+            panic!("Invalid condition id {}", id);
+            return Ok(FunctionResult {
+                discounts: vec![],
+                discount_application_strategy: DiscountApplicationStrategy::First,
+            });
+        }
     }
 
     if cart_lines.is_empty() || config.percentage == 0.0 {

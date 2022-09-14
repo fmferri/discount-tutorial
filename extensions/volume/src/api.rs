@@ -67,8 +67,19 @@ pub mod input {
     pub struct Cart {
         pub lines: Vec<CartLine>,
         pub attribute: Option<Attribute>,
+        pub buyerIdentity: BuyerIdentity,
     }
 
+    #[derive(Clone, Debug, Serialize, Deserialize)]
+    pub struct BuyerIdentity {
+        pub email: String,
+        pub customer: Customer,
+    }
+
+    #[derive(Clone, Debug, Serialize, Deserialize)]
+    pub struct Customer {
+        pub id: String,
+    }
     #[derive(Clone, Debug, Serialize, Deserialize)]
     pub struct Attribute {
         pub key: String,

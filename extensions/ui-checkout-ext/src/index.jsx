@@ -1,3 +1,13 @@
+/**
+ * The checkout extensions are built in react but are server side rendered,
+ * this means we don't have access to some features like local storage and session storage.
+ * 
+ * Check the limitations
+ */
+
+// TODO: REWRITE THIS COMPONENT TO BE ABLE TO SHOW THE DISCOUNT AND USE POINTS.
+// TODO: CHECK IF WE CAN MANAGE BOTH DISCOUNTS (% & €) IN THE SAME SHOPIFY FUNCTION - otherwise we'll have to use 2 discounts combined'
+
 import React, { useEffect, useState } from "react";
 
 import {
@@ -62,7 +72,7 @@ function App() {
             });
 
             if(foundAttribute == data.value){
-              console.warn('Attribute already setted and no need to change');
+              console.warn('Attribute already setted and no need to change', data.value);
               return;
             }
 
@@ -82,23 +92,27 @@ function App() {
               // since we only have to trigger the discount function without adding any product
               // we set quantity to 0
 
-              await applyCartLinesChange({
-                type: "addCartLine",
-                merchandiseId: productId,
-                quantity: 0,
-              })
-                .then((applyCartLinesChangeResponse) =>
-                  console.log(
-                    "applyCartLinesChangeResponse",
-                    applyCartLinesChangeResponse
-                  )
-                )
-                .catch((applyCartLinesChangeError) =>
-                  console.error(
-                    "applyCartLinesChangeError",
-                    applyCartLinesChangeError
-                  )
-                );
+              /**
+               * commented this function since we are using the theme extension to set the cart attribute
+               */
+
+              // await applyCartLinesChange({
+              //   type: "addCartLine",
+              //   merchandiseId: productId,
+              //   quantity: 0,
+              // })
+              //   .then((applyCartLinesChangeResponse) =>
+              //     console.log(
+              //       "applyCartLinesChangeResponse",
+              //       applyCartLinesChangeResponse
+              //     )
+              //   )
+              //   .catch((applyCartLinesChangeError) =>
+              //     console.error(
+              //       "applyCartLinesChangeError",
+              //       applyCartLinesChangeError
+              //     )
+              //   );
             });
           } catch (e) {
             console.log("ERROR in applyAttributeChange", e);

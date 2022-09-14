@@ -7,6 +7,7 @@
       Hi {{ customer.name }}!
     </div>
     <form class="visually-hidden" id="lv-customer-info">
+      <input type="text" name="accepts_marketing" value="{{ customer.accepts_marketing | json }}">
       <input type="text" name="email" value="{{ customer.email }}">
       <input type="text" name="accepts_marketing" value="{{ customer.accepts_marketing }}">
       <input type="text" name="first_name" value="{{ customer.first_name }}">
@@ -80,10 +81,10 @@
 
 {% schema %}
 {
-  "name": "Party",
+  "name": "Loyalty",
   "target": "body",
-  "stylesheet": "image-gallery.css",
-  "javascript": "party-button.js",
+  "stylesheet": "loyalty-button.css",
+  "javascript": "loyalty-button.js",
   "settings": []
 }
 {% endschema %}

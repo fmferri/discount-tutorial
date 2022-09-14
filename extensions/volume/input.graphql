@@ -12,6 +12,12 @@ query Input {
         }
       }
     }
+    buyerIdentity {
+      email
+      customer {
+        id
+      }
+    }
   }
   discountNode {
     metafield(namespace: "discount-tutorial", key: "function-config") {
