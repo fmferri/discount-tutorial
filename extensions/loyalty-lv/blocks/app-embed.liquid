@@ -13,9 +13,10 @@
     <input type="text" name="discount_amount" value="{{ discount_allocation.amount }}">
     <input type="text" name="discount_application" value="{{ discount_allocation.discount_application }}">
   </form>
+  
+  
 {%- endif %}
-
-
+<div id="lv-settings"  class="visually-hidden">{{ block.settings | json }}</div>
 <div id="lv-root"></div>
 
 
@@ -44,8 +45,12 @@
   "name": "Loyalty",
   "target": "body",
   
-  "settings": [
-    
+  "settings": [{
+    "type": "checkbox",
+    "id": "show_button_component",
+    "label": "Show button component",
+    "default": true
+  }
   ]
 }
 {% endschema %}
