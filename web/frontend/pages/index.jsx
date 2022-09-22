@@ -17,7 +17,7 @@ import { ProductsCard } from "../components";
 export default function HomePage() {
   return (
     <Page narrowWidth>
-      <TitleBar title="App name" primaryAction={null} />
+      <TitleBar title="Lava loyalty" primaryAction={null} />
       <Layout>
         <Layout.Section>
           <Card sectioned>
@@ -29,7 +29,7 @@ export default function HomePage() {
             >
               <Stack.Item fill>
                 <TextContainer spacing="loose">
-                  <Heading>Nice work on building a Shopify app 🎉</Heading>
+                  <Heading>Welcome to the LAVA loyalty App for Shopify</Heading>
                   <p>
                     Your app is ready to explore! It contains everything you
                     need to get started including the{" "}
