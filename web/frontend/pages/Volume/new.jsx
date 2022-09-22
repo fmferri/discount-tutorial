@@ -28,7 +28,7 @@ import metafields from '../../metafields'
 import { useAuthenticatedFetch } from "../../hooks";
 
 const todaysDate = new Date();
-const FUNCTION_ID = "01GCCV8HPNEGYXAKWAJG6KT9SZ";
+const FUNCTION_ID = "01GD0CND68WZ2KWNMV3RKFK6GB";
 
 export default function VolumeNew() {
   const app = useAppBridge();

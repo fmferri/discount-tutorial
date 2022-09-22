@@ -1,7 +1,10 @@
+#[macro_use] extern crate magic_crypt;
 use serde::Serialize;
 
 mod api;
 use api::*;
+
+use magic_crypt::MagicCryptTrait;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let input: input::Input = serde_json::from_reader(std::io::BufReader::new(std::io::stdin()))?;
@@ -22,7 +25,7 @@ fn function(input: input::Input) -> Result<FunctionResult, Box<dyn std::error::E
 
     if customer_id.is_empty() {
         // if the customer id is empty return no discount
-        panic!("Customer id is_empty");
+        panic!("Customer id is_empty{:?}",cart_attribute);
         return Ok(FunctionResult {
             discounts: vec![],
             discount_application_strategy: DiscountApplicationStrategy::First,
@@ -36,6 +39,17 @@ fn function(input: input::Input) -> Result<FunctionResult, Box<dyn std::error::E
             .expect("REASON")
             .to_string();
         // TODO: need to understand how the expect works!
+
+        //inserire decrypting of attribute
+        println!("attribute: {:?}",attribute);
+        //panic!("attribute: {:?}",attribute);
+//testing
+        let mc = new_magic_crypt!("solillo", 256);
+
+        let attribute = mc.decrypt_base64_to_string(&attribute).unwrap();
+        println!("{:?}", attribute);
+//end testing
+
         let value = attribute.split("::").nth(0).unwrap();
         let id = attribute.split("::").nth(1).unwrap();
         if "gid://shopify/Customer/".to_owned() + id == customer_id {

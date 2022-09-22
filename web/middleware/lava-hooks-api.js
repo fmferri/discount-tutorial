@@ -9,6 +9,16 @@ import dotenv from "dotenv";
 dotenv.config();
 import axios from "axios";
 import { request, gql, GraphQLClient } from "graphql-request";
+import CryptoJS from "crypto-js";
+
+
+//TODO key and iv to be set in configuration or somewhere they are available from JS and from RS
+
+const key = CryptoJS.SHA256("solillo");
+const plaintext = "20::5424413868081";
+const iv = CryptoJS.enc.Base64.parse("AAAAAAAAAAAAAAAAAAAAAA==")
+console.log("key: ",key);
+console.log("iv: ",iv.toString());
 
 export default function applyLavaHooksApiEndpoints(app) {
   app.post("/api/lv/cartupdate", async (req, res) => {
@@ -38,12 +48,18 @@ export default function applyLavaHooksApiEndpoints(app) {
           console.log("ERROR", err);
         });
 
-      const discountResponse = await checkForDiscount(req.body);
+      let discountResponse = JSON.parse(await checkForDiscount(req.body)) ;
+       console.log("prima dell'encrypting ", discountResponse);
+      const discountResponseEncrypted = await encrypt(discountResponse.attributeValue+"");
+      console.log("dopo l'encrypting ", discountResponseEncrypted);
+      discountResponse["attributeValue"] = discountResponseEncrypted;
+      console.log("discountResponse dopo encrypt: ",discountResponse);
       res.header("Access-Control-Allow-Origin");
-      res.send(discountResponse);
+      res.send(JSON.stringify(discountResponse));
       res.end();
+      console.log("risposta inviata");
     } catch (error) {
-      console.log("ERROR", error);
+      console.log("ERROR in applyLavaHooksApiEndpoints", error);
       res.status(500).send(error.message);
     }
   });
@@ -58,7 +74,7 @@ const getCustomerInfo = async (id) => {
   // console.log("TESTING getUserInfo", id);
   id = "gid://shopify/Customer/" + id;
   const endpoint =
-    "https://mdgb-dev-store.myshopify.com/admin/api/2022-07/graphql.json";
+    "https://lava-shop-dev.myshopify.com/admin/api/2022-07/graphql.json";
   const variables = {};
   const query =
     gql`
@@ -98,7 +114,7 @@ const updateCustomerInfo = async (customer) => {
   // console.log("CUSTOMER ID", customer.id);
   // id = customer.customer.id;
   const endpoint =
-    "https://mdgb-dev-store.myshopify.com/admin/api/2022-07/graphql.json";
+    "https://lava-shop-dev.myshopify.com/admin/api/2022-07/graphql.json";
 
   const mutation = gql`
     mutation customerUpdate($input: CustomerInput!) {
@@ -144,4 +160,15 @@ async function checkForDiscount(data) {
     attributeValue: "20::" + data.id, // replace with something like <userId>-<value> possibly encoded
   };
   return JSON.stringify(response);
+}
+
+function encrypt(text) {
+  let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
+  let encrypted = cipher.update(text);
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  console.log("cipher: ", cipher);
+  console.log("encrypted: ",encrypted);
+  let ciphertext = CryptoJS.AES.encrypt(plaintext, key, {iv: iv});
+  console.log("ciphertextString: ", ciphertext.toString());
+  return ciphertext.toString('hex');
 }
