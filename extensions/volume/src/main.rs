@@ -1,4 +1,5 @@
-#[macro_use] extern crate magic_crypt;
+#[macro_use]
+extern crate magic_crypt;
 use serde::Serialize;
 
 mod api;
@@ -25,7 +26,7 @@ fn function(input: input::Input) -> Result<FunctionResult, Box<dyn std::error::E
 
     if customer_id.is_empty() {
         // if the customer id is empty return no discount
-        panic!("Customer id is_empty{:?}",cart_attribute);
+        panic!("Customer id is_empty{:?}", cart_attribute);
         return Ok(FunctionResult {
             discounts: vec![],
             discount_application_strategy: DiscountApplicationStrategy::First,
@@ -34,24 +35,25 @@ fn function(input: input::Input) -> Result<FunctionResult, Box<dyn std::error::E
 
     if cart_attribute.is_some() {
         // read che attribute
-        let attribute = cart_attribute
+        let mut attribute = cart_attribute
             .map(|cart_attribute| cart_attribute.value)
             .expect("REASON")
             .to_string();
-        // TODO: need to understand how the expect works!
 
         //inserire decrypting of attribute
-        println!("attribute: {:?}",attribute);
-        //panic!("attribute: {:?}",attribute);
-//testing
-        let mc = new_magic_crypt!("solillo", 256);
+        // println!("attribute: {:?}", attribute);
+        // panic!("attribute: {:?}", attribute);
+        //testing
+        let mc = new_magic_crypt!(customer_id.clone(), 256);
 
-        let attribute = mc.decrypt_base64_to_string(&attribute).unwrap();
-        println!("{:?}", attribute);
-//end testing
+        let attribute = mc.decrypt_base64_to_string(&attribute);
+        // panic!("attribute {:?}", attribute);
+        let attribute = attribute.unwrap();
+        //end testing
 
         let value = attribute.split("::").nth(0).unwrap();
         let id = attribute.split("::").nth(1).unwrap();
+        // panic!("id: {:?}", id);
         if "gid://shopify/Customer/".to_owned() + id == customer_id {
             config.percentage = value.parse::<f64>().unwrap();
         } else {
@@ -95,6 +97,7 @@ fn function(input: input::Input) -> Result<FunctionResult, Box<dyn std::error::E
             value: Value::Percentage(Percentage {
                 value: config.percentage,
             }),
+            // value: Value::
         }],
         discount_application_strategy: DiscountApplicationStrategy::First,
     })

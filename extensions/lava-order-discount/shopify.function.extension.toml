@@ -1,0 +1,11 @@
+name = "lava-order-discount"
+type = "order_discounts"
+api_version = "2022-07"
+
+[build]
+command = "cargo wasi build --release"
+path = "target/wasm32-wasi/release/lava-order-discount.wasm"
+
+[ui.paths]
+create = "/lava-discount/new"
+details = "/lava-discount/:id"

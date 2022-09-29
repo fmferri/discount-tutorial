@@ -24,20 +24,22 @@ import {
   Stack,
   PageActions,
   RadioButton,
+  Button,
 } from "@shopify/polaris";
 
 import metafields from '../../metafields'
 import { useAuthenticatedFetch } from "../../hooks";
 
 const todaysDate = new Date();
-const FUNCTION_ID = "01GD0CND68WZ2KWNMV3RKFK6GB";
+const FUNCTION_ID = "01GE2QMGK3T8RM7JMQS094XR0K";
 
-export default function VolumeNew() {
+export default function LavaDiscountNew() {
   const app = useAppBridge();
   const redirect = Redirect.create(app);
   const currencyCode = CurrencyCode.Cad;
   const authenticatedFetch = useAuthenticatedFetch();
   const [discountType, setDiscountType] = useState();
+  const [secret, setSecret] = useState('');
 
   const {
     fields: {
@@ -107,7 +109,6 @@ export default function VolumeNew() {
           },
         ],
       };
-
       let response;
       if (form.discountMethod === DiscountMethod.Automatic) {
         response = await authenticatedFetch("/api/discounts/automatic", {
@@ -169,7 +170,7 @@ export default function VolumeNew() {
 
   return (
     <Page
-      title="Create volume discount"
+      title="Create a Lava order discount"
       breadcrumbs={[
         {
           content: "Discounts",
@@ -188,13 +189,13 @@ export default function VolumeNew() {
         <Layout.Section>
           <form onSubmit={submit}>
             <MethodCard
-              title="Volume"
+              title="Discount Mode"
               discountTitle={discountTitle}
-              discountClass={DiscountClass.Product}
+              discountClass={DiscountClass.Order}
               discountCode={discountCode}
               discountMethod={discountMethod}
             />
-            <Card title="Volume">
+            <Card title="Discount Type">
               <Card.Section>
                 <Stack>
                   <RadioButton
@@ -205,7 +206,7 @@ export default function VolumeNew() {
                     name="percentageDiscount"
                     onChange={() => { 
                       setDiscountType('percentageDiscount');
-                      configuration.disountType = 'percentageDiscount';
+                      configuration.discountType = 'percentageDiscount';
                     }}
                   />
                   <RadioButton
@@ -216,7 +217,7 @@ export default function VolumeNew() {
                     checked={discountType === 'amountDiscount'}
                     onChange={() => {
                       setDiscountType('amountDiscount');
-                      configuration.disountType = 'amountDiscount';
+                      configuration.discountType = 'amountDiscount';
                     }}
                   />
                 </Stack>
@@ -242,6 +243,16 @@ export default function VolumeNew() {
                 </Stack>
               </Card.Section>
             </Card>
+            <Card title="Discount Secret">
+                <Card.Section>              
+                    Choose a secret key for security purposes 
+                    <TextField
+                    labelAction={{content: 'Generate', onAction: ()=>{setSecret( Math.random().toString(36).slice(2,10) ) }}}
+                    label="Secret Key"
+                    {...configuration.secret}
+                    />    
+                </Card.Section>
+            </Card>
             {discountMethod.value === DiscountMethod.Code && (
               <UsageLimitsCard
                 totalUsageLimit={usageTotalLimit}
@@ -250,7 +261,7 @@ export default function VolumeNew() {
             )}
             <CombinationCard
               combinableDiscountTypes={combinesWith}
-              discountClass={DiscountClass.Product}
+              discountClass={DiscountClass.Order}
               discountDescriptor={
                 discountMethod.value === DiscountMethod.Automatic
                   ? discountTitle.value

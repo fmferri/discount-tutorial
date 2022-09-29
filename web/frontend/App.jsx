@@ -28,6 +28,14 @@ export default function App() {
                   },
                 ]}
               />
+              <NavigationMenu
+                navigationLinks={[
+                  {
+                    label: "New lava discount",
+                    destination: "/lava-discount/new",
+                  },
+                ]}
+              />
               <Routes pages={pages} />
             </QueryProvider>
           </DiscountProvider>

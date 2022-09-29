@@ -8,59 +8,35 @@
 import dotenv from "dotenv";
 dotenv.config();
 import axios from "axios";
-import { request, gql, GraphQLClient } from "graphql-request";
 import CryptoJS from "crypto-js";
-
+import _ from "lodash";
 
 //TODO key and iv to be set in configuration or somewhere they are available from JS and from RS
-
-const key = CryptoJS.SHA256("solillo");
-const plaintext = "20::5424413868081";
-const iv = CryptoJS.enc.Base64.parse("AAAAAAAAAAAAAAAAAAAAAA==")
-console.log("key: ",key);
-console.log("iv: ",iv.toString());
 
 export default function applyLavaHooksApiEndpoints(app) {
   app.post("/api/lv/cartupdate", async (req, res) => {
     try {
-      console.log("WEBOOK REQUEST CARTUPDATE ARRIVATA");
-      console.log("BODY", req.body);
-      // console.log("HEADER", req.headers);
-      // console.log("PARAMS", req.params);
+      // console.log("WEBOOK REQUEST CARTUPDATE ARRIVATA");
+      // console.log("BODY", req.body);
       const customerInput = req.body;
-      console.log("customerInput", customerInput);
-      const customer = getCustomerInfo(customerInput.id)
-        .then((data) => {
-          console.log("SUCCESS CUSTOMER", JSON.stringify(data, undefined, 2));
-          const updatedCustomer = updateCustomerInfo(data).then(
-            (updatedCustomer) => {
-              // console.log("UPDATED CUSTOMER", updatedCustomer);
-              const updatedCustomer2 = getCustomerInfo(customerInput.id).then(
-                (updatedCustomer2) => {
-                  // console.log("UPDATED CUSTOMER2", updatedCustomer2);
-                }
-              );
-            }
-          );
-          return data;
-        })
-        .catch((err) => {
-          console.log("ERROR", err);
-        });
-
-      let discountResponse = JSON.parse(await checkForDiscount(req.body)) ;
-       console.log("prima dell'encrypting ", discountResponse);
-      const discountResponseEncrypted = await encrypt(discountResponse.attributeValue+"");
-      console.log("dopo l'encrypting ", discountResponseEncrypted);
+      let discountResponse = JSON.parse(await checkForDiscount(req.body, res));
+      const key = CryptoJS.SHA256("gid://shopify/Customer/" + req.body.id);
+      const iv = CryptoJS.enc.Base64.parse("AAAAAAAAAAAAAAAAAAAAAA==");
+      const discountResponseEncrypted = encrypt(
+        discountResponse.attributeValue,
+        key,
+        iv
+      );
       discountResponse["attributeValue"] = discountResponseEncrypted;
-      console.log("discountResponse dopo encrypt: ",discountResponse);
       res.header("Access-Control-Allow-Origin");
+
+      // console.log("--- discountResponse", discountResponse);
       res.send(JSON.stringify(discountResponse));
       res.end();
-      console.log("risposta inviata");
     } catch (error) {
       console.log("ERROR in applyLavaHooksApiEndpoints", error);
-      res.status(500).send(error.message);
+      res.status(418).send(error.toString());
+      res.end();
     }
   });
 
@@ -70,105 +46,94 @@ export default function applyLavaHooksApiEndpoints(app) {
   });
 }
 
-const getCustomerInfo = async (id) => {
-  // console.log("TESTING getUserInfo", id);
-  id = "gid://shopify/Customer/" + id;
-  const endpoint =
-    "https://lava-shop-dev.myshopify.com/admin/api/2022-07/graphql.json";
-  const variables = {};
-  const query =
-    gql`
-    {
-      customer(id: "` +
-    id +
-    `") {
-      	id
-        firstName
-        lastName
-        acceptsMarketing
-        email
-        phone
-        createdAt
-        updatedAt
-        note
-        verifiedEmail
-        validEmailAddress
-        tags
-        lifetimeDuration
-      }
-    }
-  `;
-  // console.log("QUERY", query);
-  const client = new GraphQLClient(endpoint, {
-    headers: {
-      "X-Shopify-Access-Token": process.env.ADMIN_API_ACCESS_TOKEN,
-    },
-  });
-  return client.request(query, variables);
-};
-
-const updateCustomerInfo = async (customer) => {
-  customer = JSON.parse(JSON.stringify(customer)).customer;
-  customer.tags = "SILVER-50";
-  // console.log("TESTING updateCustomerInfo", customer);
-  // console.log("CUSTOMER ID", customer.id);
-  // id = customer.customer.id;
-  const endpoint =
-    "https://lava-shop-dev.myshopify.com/admin/api/2022-07/graphql.json";
-
-  const mutation = gql`
-    mutation customerUpdate($input: CustomerInput!) {
-      customerUpdate(input: $input) {
-        customer {
-          id
-          tags
-        }
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
-  // console.log("mutation", mutation);
-  const variables = {
-    input: {
-      id: customer.id,
-      tags: customer.tags,
-    },
-  };
-  const client = new GraphQLClient(endpoint, {
-    headers: {
-      "X-Shopify-Access-Token": process.env.ADMIN_API_ACCESS_TOKEN,
-    },
-  });
-  return client
-    .request(mutation, variables)
-    .then((data) => {
-      // console.log("CUSTOMER Updated", JSON.stringify(data, undefined, 2));
-      return data;
+async function checkForDiscount(data, res) {
+  console.log("--- checkForDiscount", data);
+  /**
+   * STEP 1 CALL LAVA getMembership API.
+   */
+  const domain = "https://realmadrid-staging-membership.lava.ai";
+  const endPointMembership = "/v1/memberships/";
+  const AuthStr = "Bearer ".concat(process.env.LAVA_TOKEN);
+  const urlMembership = domain + endPointMembership + data.email;
+  const membershipResponse = await axios
+    .get(urlMembership, {
+      params: { stored_only: false },
+      headers: { Authorization: AuthStr },
     })
-    .catch((err) => {
-      console.log("ERROR", err);
+    .then((response) => {
+      // console.log("--- first LAVA response", response);
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("--- ERROR CALL", error.response);
+      throw new Error(
+        JSON.stringify({
+          status: error.response.status,
+          error: error.response.statusText.toString(),
+        })
+      );
     });
-};
+  // console.log("--- membershipResponse", membershipResponse);
+  const balancesIDs = [];
+  if (!membershipResponse?.balances) {
+    // return JSON.stringify({});
+    throw new Exception("BROKEN");
+  }
+  const balances = _.filter(membershipResponse?.balances, (balance) => {
+    if (
+      balance.promotion.type === "percentage" &&
+      balance.promotion.applies_to_transaction == true
+    ) {
+      balancesIDs.push(balance.promotion.id.toString());
+      return true;
+    }
+    return false;
+  });
 
-async function checkForDiscount(data) {
-  const response = {
+  /**
+   * STEP 2 CALL LAVA reward API.
+   */
+
+  const endPointReward = "/v1/reward";
+  const urlReward = domain + endPointReward;
+  const rewardResponse = await axios
+    .get(urlReward, {
+      headers: { Authorization: AuthStr },
+    })
+    .then((response) => {
+      // console.log("--- first LAVA response", response);
+      return response.data;
+    })
+    .catch((error) => {
+      console.error("--- ERROR", error);
+    });
+  console.log("--- rewardResponse", rewardResponse);
+  const rewards = _.filter(rewardResponse, (reward) => {
+    const condition =
+      reward.params.scope === "txn" &&
+      reward.params.action === "percent_off" &&
+      balancesIDs.includes(reward.id.toString());
+    console.log("--- condition", condition);
+    return condition;
+  });
+
+  /**
+   * STEP 3 GET THE ONE WITH HIGHEST AMOUNT
+   */
+  const bestReward = _.orderBy(rewards, ["params.amount"], ["desc"])[0];
+  console.log("--- bestReward", bestReward);
+
+  const extractedResponse = {
     statusDiscount: "OK",
     attributeKey: "volume_code",
-    attributeValue: "20::" + data.id, // replace with something like <userId>-<value> possibly encoded
+    attributeValue: bestReward.params.amount + "::" + data.id, // replace with something like <userId>-<value> possibly encoded
   };
-  return JSON.stringify(response);
+  console.log("--- extractedResponse", extractedResponse);
+  return JSON.stringify(extractedResponse);
 }
 
-function encrypt(text) {
-  let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(key), iv);
-  let encrypted = cipher.update(text);
-  encrypted = Buffer.concat([encrypted, cipher.final()]);
-  console.log("cipher: ", cipher);
-  console.log("encrypted: ",encrypted);
-  let ciphertext = CryptoJS.AES.encrypt(plaintext, key, {iv: iv});
-  console.log("ciphertextString: ", ciphertext.toString());
-  return ciphertext.toString('hex');
+function encrypt(text, key, iv) {
+  let ciphertext = CryptoJS.AES.encrypt(text, key, { iv: iv });
+  // console.log("ciphertextString: ", ciphertext.toString());
+  return ciphertext.toString();
 }

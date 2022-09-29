@@ -13,6 +13,7 @@ import productCreator from "./helpers/product-creator.js";
 import metafields from "./frontend/metafields.js";
 
 import applyLavaHooksApiEndpoints from "./middleware/lava-hooks-api.js";
+import testEndpointApi from "./middleware/test-endoint-api.js";
 
 import cors from "cors";
 
@@ -208,8 +209,23 @@ export async function createServer(
   app.set("active-shopify-shops", ACTIVE_SHOPIFY_SHOPS);
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
 
-  app.use(cors());
+  app.use(
+    cors({
+      origin: true,
+      methods: "GET,POST",
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
+    })
+  );
 
+  console.log("--- PORT", PORT);
+
+  app.use(express.json());
+
+  applyLavaHooksApiEndpoints(app);
+  testEndpointApi(app);
+
+  // app.options("*", cors());
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
 
   applyAuthMiddleware(app, {
@@ -227,10 +243,6 @@ export async function createServer(
       }
     }
   });
-
-  app.use(express.json());
-
-  applyLavaHooksApiEndpoints(app);
 
   // All endpoints after this point will require an active session
   app.use(
