@@ -38,13 +38,14 @@
 "stylesheet": "main.css",
   "javascript": "main.js",
 -->
-<script defer src="http://localhost:3000/static/js/bundle.js"></script>
+{% comment %} <s    cript defer src="http://localhost:3000/static/js/bundle.js"></script> {% endcomment %}
 
 {% schema %}
 {
   "name": "Loyalty",
   "target": "body",
-
+  "stylesheet": "main.css",
+  "javascript": "main.js",
   "settings": [{
     "type": "checkbox",
     "id": "show_button_component",
