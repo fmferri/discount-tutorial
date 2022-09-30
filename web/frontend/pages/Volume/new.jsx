@@ -38,6 +38,7 @@ export default function VolumeNew() {
   const currencyCode = CurrencyCode.Cad;
   const authenticatedFetch = useAuthenticatedFetch();
   const [discountType, setDiscountType] = useState();
+  const [secret, setSecret] = useState(); 
 
   const {
     fields: {
