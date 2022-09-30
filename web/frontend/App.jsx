@@ -28,10 +28,6 @@ export default function App() {
                   },
                 ]}
               />
-<<<<<<< Updated upstream
-              
-=======
->>>>>>> Stashed changes
               <Routes pages={pages} />
             </QueryProvider>
           </DiscountProvider>
