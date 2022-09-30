@@ -19,6 +19,12 @@
     "cross-env": "^7.0.3",
     "cors": "^2.8.5",
     "express": "^4.17.3",
+    "axios": "^0.27.2",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.2",
+    "graphql": "^16.6.0",
+    "graphql-request": "^5.0.0",
+    "react": "^17.0.0",
     "serve-static": "^1.14.1"
   },
   "devDependencies": {
