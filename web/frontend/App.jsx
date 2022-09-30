@@ -23,12 +23,15 @@ export default function App() {
               <NavigationMenu
                 navigationLinks={[
                   {
-                    label: "New volume discount",
+                    label: "New volume Product discount",
                     destination: "/Volume/new",
                   },
                 ]}
               />
+<<<<<<< Updated upstream
               
+=======
+>>>>>>> Stashed changes
               <Routes pages={pages} />
             </QueryProvider>
           </DiscountProvider>
