@@ -51,7 +51,8 @@ function App() {
     const productId = cartLines[0].merchandise?.id;
     try {
       // call LAVA API
-      await fetch("https://jsonplaceholder.typicode.com/todos/1", {
+      // await fetch("https://jsonplaceholder.typicode.com/todos/1", {
+      await fetch("https://af2d-91-81-94-158.eu.ngrok.io:60829/api/lv/cartupdate", {
         mode: "cors",
         credentials: "same-origin",
         headers: {
@@ -163,7 +164,7 @@ function App() {
 
   useEffect(() => {
     if (!apiResponse) {
-      // testApplyLavaDiscount();
+      testApplyLavaDiscount();
     }
   }, []);
 
